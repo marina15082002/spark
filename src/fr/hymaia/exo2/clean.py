@@ -19,7 +19,6 @@ def load_data(spark):
     villes_df = spark.read.csv("src/resources/exo2/city_zipcode.csv", schema=city_schema, header=True)
 
     villes_df = villes_df.withColumnRenamed("zip", "city_zip")
-
     return clients_df, villes_df
 
 
