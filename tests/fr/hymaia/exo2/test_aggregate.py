@@ -1,6 +1,6 @@
 import unittest
 from pyspark.sql import SparkSession
-from src.fr.hymaia.exo2.aggregate import load_clean_data, calculate_population_by_department
+from src.fr.hymaia.exo2.aggregate import load_clean_data, calculate_population_by_department, execute_aggregate
 from pyspark.sql.utils import AnalysisException
 
 class TestAggregate(unittest.TestCase):
@@ -39,8 +39,7 @@ class TestAggregate(unittest.TestCase):
             calculate_population_by_department(incorrect_df)
 
     def test_integration(self):
-        clean_df = load_clean_data(self.spark)
-        aggregated_df = calculate_population_by_department(clean_df)
+        execute_aggregate(self.spark)
 
 if __name__ == "__main__":
     unittest.main()

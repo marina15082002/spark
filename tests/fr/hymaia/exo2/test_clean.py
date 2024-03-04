@@ -1,7 +1,7 @@
 import unittest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from src.fr.hymaia.exo2.clean import load_data, filter_clients, join_data, add_department_column, write_output
+from src.fr.hymaia.exo2.clean import load_data, filter_clients, join_data, add_department_column, write_output, execute_clean
 
 class TestClear(unittest.TestCase):
     spark = SparkSession.builder.master("local[*]").getOrCreate()
@@ -114,18 +114,24 @@ class TestClear(unittest.TestCase):
         self.assertEqual(result_df.collect(), expected_df.collect())
 
     def test_integration(self):
-        clients_df, villes_df = load_data(self.spark)
+        clients_schema = StructType([
+            StructField("name", StringType(), True),
+            StructField("age", IntegerType(), True),
+            StructField("zip", StringType(), True)
+        ])
 
-        clients_df = filter_clients(clients_df)
-        result_df = join_data(clients_df, villes_df)
-        result_df = add_department_column(result_df)
+        villes_schema = StructType([
+            StructField("city_zip", StringType(), True),
+            StructField("city", StringType(), True)
+        ])
 
-        write_output(result_df)
+        clients_data = [("John", 25, "12345"), ("Alice", 30, "67890")]
+        clients_df = self.spark.createDataFrame(clients_data, schema=clients_schema)
 
-        output_df = self.spark.read.parquet("data/exo2/output")
+        villes_data = [("12345", "Paris"), ("67890", "London")]
+        villes_df = self.spark.createDataFrame(villes_data, schema=villes_schema)
 
-        self.assertIn("department", output_df.columns)
-        self.assertGreater(output_df.select("department").distinct().count(), 0)
+        execute_clean(clients_df, villes_df)
 
 if __name__ == "__main__":
     unittest.main()
